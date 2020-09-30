@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "secret-pw"
+      MYSQL_DATABASE: "desafio"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ~/Desenvolvimento/Docker/Volumes/MySql:/var/lib/mysql
+    networks:
+      - mysql-network
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    network_mode: host
+
+networks:
+  mysql-network:
+    driver: bridge
+  
