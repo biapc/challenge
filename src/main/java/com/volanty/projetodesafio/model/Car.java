@@ -3,7 +3,7 @@ package com.volanty.projetodesafio.model;
 import javax.persistence.Entity;
 
 @Entity
-public class Car extends BaseEntity{
+public class Car extends BaseEntity<Car>{
 	
 	private String brand;
 	
@@ -23,5 +23,11 @@ public class Car extends BaseEntity{
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+	
+	@Override
+	public void merge(Car another) {
+		this.setBrand(another.getBrand() == null ? this.getBrand() : another.getBrand());
+		this.setModel(another.getModel() == null ? this.getModel() : another.getModel());		
 	}
 }

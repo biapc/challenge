@@ -5,9 +5,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.volanty.projetodesafio.model.Calendar;
+import com.volanty.projetodesafio.model.Schedule;
 
-public interface CalendarRepository extends JpaRepository<Calendar, Integer>{
-	public List<Calendar> findByDayAndCavId(Date day, int cavId);
-
+public interface CalendarRepository extends JpaRepository<Schedule, Integer>{
+	public List<Schedule> findByDayAndCavId(Date day, int cavId);
+	
+	public Schedule findByDayAndCavIdAndHourAndCarIdAndType(Date day, int cavId, int hour, int carId, String type);
 }

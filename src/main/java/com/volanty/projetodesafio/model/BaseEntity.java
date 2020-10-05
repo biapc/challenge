@@ -6,10 +6,10 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class BaseEntity {
+public abstract class BaseEntity<T> {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	public int getId() {
@@ -20,4 +20,6 @@ public class BaseEntity {
 		this.id = id;
 	}
 
+	
+	public abstract void merge(T another); 
 }
