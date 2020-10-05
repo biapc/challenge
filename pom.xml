@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.volanty</groupId>
 	<artifactId>projeto-desafio</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<name>GerenciamentoCAV</name>
 	<description>Gerenciamento e agendamento nas CAVs</description>
 
@@ -40,18 +40,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
@@ -63,6 +51,44 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<configuration>
+					<serverId>docker-personal</serverId>
+					<registryUrl>https://index.docker.io/v1/</registryUrl>
+
+					<imageName>biapcampos/volanty-${project.artifactId}:${project.version}</imageName>
+					<dockerDirectory>${project.basedir}/src/main/config/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/app/bin</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+				<executions>
+					<execution>
+						<id>build-image</id>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>push-image-version</id>
+						<phase>install</phase>
+						<goals>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<imageName>biapcampos/volanty-${project.artifactId}:${project.version}</imageName>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -13,12 +13,19 @@ services:
       - ~/desafio/docker/scripts/dump.sql:/docker-entrypoint-initdb.d/dump.sql
     networks:
       - mysql-network
+    healthcheck:
+      test:  mysql --user=root --password=secret-pw -e 'select * from desafio.car' desafio
 
   adminer:
     image: adminer
-    ports:
-      - 8080:8080
     network_mode: host
+  
+  desafio-volanty:
+    image: biapcampos/volanty-projeto-desafio:1.0.1
+    network_mode: host
+    depends_on:
+      - mysql
+    restart: on-failure
 
 networks:
   mysql-network:

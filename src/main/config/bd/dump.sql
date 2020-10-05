@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `desafio`;
 CREATE DATABASE `desafio`;
 USE `desafio`;
 
@@ -8,7 +9,7 @@ CREATE TABLE `cav` (
   `name` varchar(30) NOT NULL,
   `open_hours` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`)
-)
+);
 
 
 DROP TABLE IF EXISTS `car`;
@@ -17,7 +18,7 @@ CREATE TABLE `car` (
   `brand` varchar(30) NOT NULL,
   `model` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-)
+);
 
 
 DROP TABLE IF EXISTS `calendar`;
@@ -34,7 +35,7 @@ CREATE TABLE `calendar` (
   CONSTRAINT `calendar_ibfk_1` FOREIGN KEY (`cav_id`) REFERENCES `cav` (`id`) ON DELETE CASCADE,
   CONSTRAINT `calendar_ibfk_2` FOREIGN KEY (`car_id`) REFERENCES `car` (`id`) ON DELETE CASCADE,
   UNIQUE (day, hour, cav_id, type)
-)
+);
 
 
 INSERT INTO `cav` (`id`, `name`, `open_hours`) VALUES
