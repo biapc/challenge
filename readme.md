@@ -2,7 +2,6 @@
 O desafio consiste em expor APIs Rest capazes de gerenciar CAVs e agendamentos de veículos para visita e inspeção.
 
 ## Projeto
-
 ### Subindo o ambiente
 Para subir a aplicação e banco em docker é necessário:
 
@@ -21,16 +20,3 @@ $ docker-compose up -d
 database: desafio
 user: user
 password: secret-pw
-
-
-### Manual de Integração
-#### Gerenciamento de CAVs
-
-HTTP Method  | GET
-Content-Type | -
-URL          | http://localhost:8089/volanty/cav
-Body         | -
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
