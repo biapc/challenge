@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS `cav`;
 CREATE TABLE `cav` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
-  `open_hours` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `open_hours` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
 );
 

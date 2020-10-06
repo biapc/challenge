@@ -56,19 +56,23 @@ public class ScheduleController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = {"/{cavId}/{day}" }, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-	public Map<String, SortedMap<Integer, String>> showCalendar(@PathVariable int cavId, @PathVariable String day) throws ParseException, JsonMappingException, JsonProcessingException, InvalidAttributeValueException {
-		Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse(day).getTime());
+	public Map<String, SortedMap<Integer, String>> showCalendar(@PathVariable Integer cavId, @PathVariable String day) throws ParseException, JsonMappingException, JsonProcessingException, InvalidAttributeValueException {
+		Date date = parseToFormatDate(day);
 		List<Schedule> calendars = calendarRepo.findByDayAndCavId(date, cavId);
 
-		DayOfTheWeek weekDay = getWeekDay(date);
-
-		Cav cav = calendars.get(0).getCav();
+		Cav cav = null;
+		
+		if (calendars.isEmpty()) {
+			cav = getCav(cavId);
+		} else {
+			cav = calendars.get(0).getCav();
+		}
 
 		HashMap<String, OpenHours> openHours = jsonfyOpenHours(cav.getOpen_hours());
 		
-		if (openHours.get(weekDay.name()) == null) {
-			throw new InvalidAttributeValueException("Sem expediente para visita e inspe\u00E7\u00E3o neste dia");
-		}
+		DayOfTheWeek weekDay = getWeekDay(date);
+		
+		verifyWeekDayAndOpenHours(openHours, weekDay);
 
 		SortedMap<Integer, String> resultVisit = new TreeMap<Integer, String>();
 		SortedMap<Integer, String> resultInspection = new TreeMap<Integer, String>();
@@ -103,39 +107,25 @@ public class ScheduleController {
 	// insere um agendamento
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(value = {"/{cavId}/{day}/{hour}/{carId}/{type}"}, method = RequestMethod.POST)
-	public void schedule(@PathVariable int cavId, @PathVariable String day, @PathVariable int hour, @PathVariable int carId, @PathVariable String type) throws ParseException, JsonMappingException, JsonProcessingException, InvalidAttributeValueException {
-		CalendarType calType = null;
-		try {
-			calType = CalendarType.valueOf(type);		
-		} catch (Exception e) {
-			new IllegalArgumentException("Tipo n\u00E3o existente. Valores permitidos: \"visit\" ou \"inspection\"");
-		}
+	public void schedule(@PathVariable Integer cavId, @PathVariable String day, @PathVariable int hour, @PathVariable Integer carId, @PathVariable String type) throws ParseException, JsonMappingException, JsonProcessingException, InvalidAttributeValueException {
+		CalendarType calType = getType(type);
 		
-		Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse(day).getTime());
+		Date date = parseToFormatDate(day);
 		DayOfTheWeek weekDay = getWeekDay(date);		
 		
-		Optional<Cav> cavOp = cavRepo.findById(cavId);
-		if (!cavOp.isPresent()) {
-			throw new NoResultException("Cav n\u00E3o encontrada");
-		}		
-		Cav cav = cavOp.get();
+		Cav cav = getCav(cavId);
 		HashMap<String, OpenHours> openHours = jsonfyOpenHours(cav.getOpen_hours());
 		
-		if (openHours.get(weekDay.name()) == null) {
-			throw new InvalidAttributeValueException("Sem expediente para visita e inspe\u00E7\u00E3o neste dia");
-		}		
+		verifyWeekDayAndOpenHours(openHours, weekDay);
 		
-		Optional<Car> car = carRepo.findById(carId);
-		if (!car.isPresent()) {
-			throw new NoResultException("Carro n\u00E3o encontrado");
-		}
+		validateHour(openHours, weekDay, hour);
 		
 		Schedule cal = new Schedule();
 		cal.setDay(date);
 		cal.setHour(hour);
 		cal.setType(calType.name());		
 		cal.setCav(cav);
-		cal.setCar(car.get());
+		cal.setCar(getCar(carId));
 		
 		calendarRepo.save(cal);
 	}
@@ -143,15 +133,10 @@ public class ScheduleController {
 	// deleta um agendamento
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = {"/{cavId}/{day}/{hour}/{carId}/{type}"}, method = RequestMethod.DELETE)
-	public void deleteSchedule(@PathVariable int cavId, @PathVariable String day, @PathVariable int hour, @PathVariable int carId, @PathVariable String type) throws ParseException {
-		CalendarType calType = null;
-		try {
-			calType = CalendarType.valueOf(type);		
-		} catch (Exception e) {
-			new IllegalArgumentException("Tipo n\u00E3o existente. Valores permitidos: \"visit\" ou \"inspection\"");
-		}
+	public void deleteSchedule(@PathVariable Integer cavId, @PathVariable String day, @PathVariable int hour, @PathVariable Integer carId, @PathVariable String type) throws ParseException {
+		CalendarType calType = getType(type);
 		
-		Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse(day).getTime());
+		Date date = parseToFormatDate(day);
 		
 		Schedule cal = calendarRepo.findByDayAndCavIdAndHourAndCarIdAndType(date, cavId, hour, carId, calType.name());
 		
@@ -173,5 +158,56 @@ public class ScheduleController {
 		ObjectMapper mapper = new ObjectMapper();
 		TypeReference<HashMap<String, OpenHours>> typeRef = new TypeReference<HashMap<String, OpenHours>>() {};
 		return mapper.readValue(openHours, typeRef);
+	}
+	
+	private Date parseToFormatDate(String day) throws ParseException  {
+		Date date;
+		try {
+			date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse(day).getTime());
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Erro de formata\u00E7\u00E3o na data");
+		}
+				
+		if (!day.equals(date.toString())) {
+	        throw new IllegalArgumentException("Data incorreta");
+	    }
+		return date;
+	}
+	
+	private <T> T validate(Optional<T> op) {
+		if (!op.isPresent()) {
+			throw new NoResultException("Cav ou carro n\u00E3o encontrado");
+		}
+		return op.get();
+	}
+	
+	private Cav getCav(Integer id) {
+		return validate(cavRepo.findById(id));
+	}
+	
+	private Car getCar(Integer id) {
+		return validate(carRepo.findById(id));
+	}
+	
+	private CalendarType getType(String type) {
+		try {
+			return CalendarType.valueOf(type);		
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Tipo n\u00E3o existente. Valores permitidos: \"visit\" ou \"inspection\"");
+		}
+	}
+	
+	private void verifyWeekDayAndOpenHours(HashMap<String, OpenHours> openHours, DayOfTheWeek weekDay) throws InvalidAttributeValueException {
+		if (openHours.get(weekDay.name()) == null || openHours.get(weekDay.name()).getBegin() == null || openHours.get(weekDay.name()).getEnd() == null) {
+			throw new InvalidAttributeValueException();
+		}
+	}
+	
+	private void validateHour(HashMap<String, OpenHours> openHours, DayOfTheWeek weekDay, int hour) {
+		int begin = openHours.get(weekDay.name()).getBegin();
+		int end = openHours.get(weekDay.name()).getEnd();
+		if (hour < begin || hour > end) {
+			throw new IllegalArgumentException("Hor\u00E1rio inv\u00E1lido");
+		}
 	}
 }

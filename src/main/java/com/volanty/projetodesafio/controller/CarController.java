@@ -25,7 +25,6 @@ public class CarController {
 	
 	@Autowired
 	private CarRepository carRepo;
-
 	
 	// lista os carros
 	@ResponseStatus(HttpStatus.OK)
@@ -40,20 +39,26 @@ public class CarController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
 	public void insertCar(@RequestBody Car car) throws Exception {
+		if (car.getBrand() == null || car.getModel() == null) {
+			throw new IllegalArgumentException("Dados precisam estar preenchidos");
+		}
 		carRepo.save(car);
 	}
 
 	// deleta carro
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = {"/{carId}"}, method = RequestMethod.DELETE)
-	public void deleteCar(@PathVariable int carId) throws Exception {
+	public void deleteCar(@PathVariable Integer carId) throws Exception {
+		if (!carRepo.findById(carId).isPresent()) {
+			throw new NoResultException("Carro n\u00E3o encontrado");
+		}
 		carRepo.deleteById(carId);
 	}
 	
 	// atualiza carro
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = {"/{carId}"}, consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-	public void updateCar(@PathVariable int carId, @RequestBody Car car) throws Exception {
+	public void updateCar(@PathVariable Integer carId, @RequestBody Car car) throws Exception {
 		Optional<Car> carOp = carRepo.findById(carId);
 		if (!carOp.isPresent()) {
 			throw new NoResultException("Carro n\u00E3o encontrado");

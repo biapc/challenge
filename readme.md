@@ -1,22 +1,36 @@
-# Read Me First
-The following was discovered as part of building this project:
+## Desafio Volanty
+O desafio consiste em expor APIs Rest capazes de gerenciar CAVs e agendamentos de veículos para visita e inspeção.
 
-* The original package name 'com.volanty.projeto-desafio' is invalid and this project uses 'com.volanty.projetodesafio' instead.
+## Projeto
 
-# Getting Started
+### Subindo o ambiente
+Para subir a aplicação e banco em docker é necessário:
 
-### Reference Documentation
-For further reference, please consider the following sections:
+* Criar o caminho ~/desafio/docker/scripts e copiar o arquivo 'dump.sql' disponível em src/main/config/bd para ele
+```sh
+$ mkdir -p ~/desafio/docker/scripts
+$ cd ~/desafio/docker/scripts
+$ cp <caminho_projeto>/src/main/config/bd/dump.sql ./
+```
+* Estando na raiz do projeto, caminhar até src/main/config/docker para subir o docker compose
+```sh
+$ cd src/main/config/docker
+$ docker-compose up -d
+```
+* Dessa forma, a aplicação sobe localmente numa porta 8089, o banco na porta 3306 e o adminer (console administrador do banco) na porta 8080. Para acessar o console e verificar persistência dos dados, basta abrir no http://localhost:8080/ com configuração abaixo:
+database: desafio
+user: user
+password: secret-pw
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.3.4.RELEASE/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.3.4.RELEASE/maven-plugin/reference/html/#build-image)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/2.3.4.RELEASE/reference/htmlsingle/#boot-features-developing-web-applications)
 
-### Guides
-The following guides illustrate how to use some features concretely:
+### Manual de Integração
+#### Gerenciamento de CAVs
+
+HTTP Method  | GET
+Content-Type | -
+URL          | http://localhost:8089/volanty/cav
+Body         | -
 
 * [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
 * [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
 * [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
-

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volanty.projetodesafio.model.Cav;
 import com.volanty.projetodesafio.repository.CavRepository;
 
@@ -36,29 +38,44 @@ public class CavController {
 	}
 
 	// insere um CAV
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
-	public HttpStatus insertCav(@RequestBody Cav cav) throws Exception {
-		if (cavRepo.findByName(cav.getName()) == null) {
-			cavRepo.save(cav);
-			return HttpStatus.CREATED;
+	public void insertCav(@RequestBody Cav cav) throws Exception {
+		if (cavRepo.findByName(cav.getName()) != null) {
+			throw new IllegalArgumentException("CAV existente");
+		} else if (cav.getOpen_hoursJson() == null || cav.getName() == null) {
+			throw new IllegalArgumentException("Todos os dados devem estar preenchidos");
 		}
-		return HttpStatus.NOT_MODIFIED;
+		
+		cav.setOpen_hours(returnJson(cav.getOpen_hoursJson()));
+		
+		cavRepo.save(cav);
 	}
 	
 	// atualiza CAV
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = {"/{cavId}"}, consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-	public void updateCav(@PathVariable int cavId, @RequestBody Cav cav) throws Exception {
-		Optional<Cav> cavOp = cavRepo.findById(cavId);
-		if (!cavOp.isPresent()) {
-			throw new NoResultException("Cav n\u00E3o encontrada");
+	public void updateCav(@PathVariable Integer cavId, @RequestBody Cav cav) throws Exception {
+		if (cav.getOpen_hoursJson() != null) {
+			cav.setOpen_hours(returnJson(cav.getOpen_hoursJson()));
 		}
 		
-		Cav cavToUpdate = cavOp.get();
+		Cav cavToUpdate = getCav(cavId);
 
 		cavToUpdate.merge(cav);
 		
 		cavRepo.save(cavToUpdate);
+	}
+	
+	private String returnJson(Object obj) throws JsonProcessingException {
+		return new ObjectMapper().writeValueAsString(obj);
+	}
+	
+	private Cav getCav(Integer id) {
+		Optional<Cav> cavOp = cavRepo.findById(id);
+		if (!cavOp.isPresent()) {
+			throw new NoResultException("CAV n\u00E3o encontrada");
+		}
+		return cavOp.get();
 	}
 }

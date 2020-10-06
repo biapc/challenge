@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 
 public class OpenHours {
 	
-	@JsonAlias({"inicio", "Inicio"})
+	@JsonAlias({"inicio", "Inicio", "begin"})
 	private Integer begin;
 	
-	@JsonAlias({"fim", "Fim"})
+	@JsonAlias({"fim", "Fim", "end"})
 	private Integer end;
 	
 	public Integer getBegin() {

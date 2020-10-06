@@ -33,10 +33,8 @@ public class MyExceptionHandler extends ResponseEntityExceptionHandler {
     }
 	
 	@ExceptionHandler(InvalidAttributeValueException.class)
-	public ResponseEntity<String> handleAttributeValueException(Exception ex) {
-		String error = ex.getMessage();
-
-        return new ResponseEntity<>(error, HttpStatus.NO_CONTENT);
+	public void handleAttributeValueException(HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.NO_CONTENT.value());
     }
 	
 	@ExceptionHandler(DataIntegrityViolationException.class)
