@@ -19,9 +19,9 @@ services:
   adminer:
     image: adminer
     network_mode: host
-  
+
   desafio-volanty:
-    image: biapcampos/volanty-projeto-desafio:1.0.1
+    image: biapcampos/volanty-projeto-desafio:1.0.2
     network_mode: host
     depends_on:
       - mysql
@@ -30,4 +30,3 @@ services:
 networks:
   mysql-network:
     driver: bridge
-  

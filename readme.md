@@ -16,7 +16,5 @@ $ cp <caminho_projeto>/src/main/config/bd/dump.sql ./
 $ cd src/main/config/docker
 $ docker-compose up -d
 ```
-* Dessa forma, a aplicação sobe localmente numa porta 8089, o banco na porta 3306 e o adminer (console administrador do banco) na porta 8080. Para acessar o console e verificar persistência dos dados, basta abrir no http://localhost:8080/ com configuração abaixo:
-database: desafio
-user: user
-password: secret-pw
+* Dessa forma, a aplicação sobe localmente numa porta 8089, o banco na porta 3306 e o adminer (console administrador do banco) na porta 8080. Para acessar o console e verificar persistência dos dados, basta abrir no http://localhost:8080/ com configuração:
+servidor = 127.0.0.1:3306 | base de dados = desafio | usuário = root | senha = secret-pw
